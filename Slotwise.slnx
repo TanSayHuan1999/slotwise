@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="Slotwise.Tests/Slotwise.Tests.csproj" />
+  <Project Path="Slotwise/Slotwise.csproj" />
+</Solution>
