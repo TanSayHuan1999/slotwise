@@ -1,0 +1,88 @@
+@page
+@model Slotwise.Pages.Admin.IndexModel
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<h1>@Model.Tenant.Name</h1>
+<p class="subtitle">@Model.TodayLocal.ToString("dddd, d MMMM yyyy") · all times @Model.Tenant.TimeZoneId local</p>
+
+<div class="stats">
+    <div class="stat"><div class="num">@Model.TodayBookings.Count</div><div class="lbl">Bookings today</div></div>
+    <div class="stat"><div class="num">@Model.UpcomingCount</div><div class="lbl">Upcoming bookings</div></div>
+    <div class="stat"><div class="num">@Model.RemindersSentCount</div><div class="lbl">Reminders sent</div></div>
+</div>
+
+<div class="card">
+    <h2>Today's bookings</h2>
+    @if (Model.TodayBookings.Count == 0)
+    {
+        <p class="muted" style="margin:0">No bookings today.</p>
+    }
+    else
+    {
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr><th>Time</th><th>Customer</th><th>Service</th><th>Staff</th><th>Status</th></tr>
+                </thead>
+                <tbody>
+                    @foreach (var b in Model.TodayBookings)
+                    {
+                        <tr>
+                            <td>@Model.Local(b.StartUtc).ToString("h:mm tt")</td>
+                            <td>@b.CustomerName<div class="muted small">@b.CustomerContact</div></td>
+                            <td>@Model.ServiceNames.GetValueOrDefault(b.ServiceId, "—")</td>
+                            <td>@Model.StaffNames.GetValueOrDefault(b.StaffMemberId, "—")</td>
+                            <td>
+                                <span class="badge badge-@b.Status.ToString().ToLowerInvariant()">@b.Status</span>
+                                @if (b.ReminderSentAt is not null)
+                                {
+                                    <span class="badge badge-reminder">Reminder sent</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+<div class="card">
+    <h2>Coming up</h2>
+    @if (Model.Upcoming.Count == 0)
+    {
+        <p class="muted" style="margin:0">No upcoming bookings.</p>
+    }
+    else
+    {
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr><th>When</th><th>Customer</th><th>Service</th><th>Staff</th><th>Status</th></tr>
+                </thead>
+                <tbody>
+                    @foreach (var b in Model.Upcoming)
+                    {
+                        var local = Model.Local(b.StartUtc);
+                        <tr>
+                            <td>@local.ToString("ddd, d MMM") · @local.ToString("h:mm tt")</td>
+                            <td>@b.CustomerName</td>
+                            <td>@Model.ServiceNames.GetValueOrDefault(b.ServiceId, "—")</td>
+                            <td>@Model.StaffNames.GetValueOrDefault(b.StaffMemberId, "—")</td>
+                            <td>
+                                <span class="badge badge-@b.Status.ToString().ToLowerInvariant()">@b.Status</span>
+                                @if (b.ReminderSentAt is not null)
+                                {
+                                    <span class="badge badge-reminder">Reminder sent</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    <p style="margin-bottom:0"><a asp-page="/Admin/Bookings">Manage all bookings →</a></p>
+</div>

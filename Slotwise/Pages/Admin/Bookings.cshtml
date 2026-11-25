@@ -1,0 +1,102 @@
+@page
+@model Slotwise.Pages.Admin.BookingsModel
+@{
+    ViewData["Title"] = "Bookings";
+}
+
+<h1>Bookings</h1>
+<p class="subtitle">@Model.Tenant.Name · times in @Model.Tenant.TimeZoneId local time</p>
+
+@if (Model.Flash is not null)
+{
+    <div class="alert alert-success">@Model.Flash</div>
+}
+
+<div class="card">
+    <form method="get">
+        <div class="form-row">
+            <div class="field">
+                <label for="date">Date (clear for all dates)</label>
+                <input type="date" id="date" name="Date" value="@Model.Date" />
+            </div>
+            <div class="field">
+                <label for="status">Status</label>
+                <select id="status" name="Status">
+                    <option value="" selected="@(string.IsNullOrEmpty(Model.Status))">All statuses</option>
+                    @foreach (var s in Enum.GetNames<BookingStatus>())
+                    {
+                        <option value="@s" selected="@(Model.Status == s)">@s</option>
+                    }
+                </select>
+            </div>
+            <div class="field" style="align-self:end">
+                <button type="submit" class="btn secondary">Filter</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="card">
+    @if (Model.Bookings.Count == 0)
+    {
+        <p class="muted" style="margin:0">No bookings match these filters.</p>
+    }
+    else
+    {
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr><th>When</th><th>Customer</th><th>Service</th><th>Staff</th><th>Status</th><th>Actions</th></tr>
+                </thead>
+                <tbody>
+                    @foreach (var b in Model.Bookings)
+                    {
+                        var local = Model.Local(b.StartUtc);
+                        <tr>
+                            <td style="white-space:nowrap">@local.ToString("ddd, d MMM")<br />@local.ToString("h:mm tt")</td>
+                            <td>@b.CustomerName<div class="muted small">@b.CustomerContact</div></td>
+                            <td>@Model.ServiceNames.GetValueOrDefault(b.ServiceId, "—")</td>
+                            <td>@Model.StaffNames.GetValueOrDefault(b.StaffMemberId, "—")</td>
+                            <td>
+                                <span class="badge badge-@b.Status.ToString().ToLowerInvariant()">@b.Status</span>
+                                @if (b.ReminderSentAt is not null)
+                                {
+                                    <span class="badge badge-reminder">Reminder sent</span>
+                                }
+                            </td>
+                            <td>
+                                @if (b.Status == BookingStatus.Confirmed)
+                                {
+                                    <div class="actions">
+                                        <form method="post" asp-page-handler="Complete" class="inline-form">
+                                            <input type="hidden" name="bookingId" value="@b.Id" />
+                                            <input type="hidden" name="Date" value="@Model.Date" />
+                                            <input type="hidden" name="Status" value="@Model.Status" />
+                                            <button type="submit" class="btn small secondary">Complete</button>
+                                        </form>
+                                        <form method="post" asp-page-handler="NoShow" class="inline-form">
+                                            <input type="hidden" name="bookingId" value="@b.Id" />
+                                            <input type="hidden" name="Date" value="@Model.Date" />
+                                            <input type="hidden" name="Status" value="@Model.Status" />
+                                            <button type="submit" class="btn small secondary">No-show</button>
+                                        </form>
+                                        <form method="post" asp-page-handler="Cancel" class="inline-form">
+                                            <input type="hidden" name="bookingId" value="@b.Id" />
+                                            <input type="hidden" name="Date" value="@Model.Date" />
+                                            <input type="hidden" name="Status" value="@Model.Status" />
+                                            <button type="submit" class="btn small danger">Cancel</button>
+                                        </form>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <span class="muted small">—</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

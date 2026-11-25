@@ -1,0 +1,57 @@
+@page
+@model Slotwise.Pages.Admin.StaffModel
+@{
+    ViewData["Title"] = "Staff";
+}
+
+<h1>Staff</h1>
+<p class="subtitle">Who customers can book with. Working hours decide which slots appear.</p>
+
+<div class="card">
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr><th>Name</th><th>Active</th><th></th><th></th></tr>
+            </thead>
+            <tbody>
+                @foreach (var m in Model.Staff)
+                {
+                    <tr>
+                        <td>@m.Name</td>
+                        <td>@(m.IsActive ? "Yes" : "No")</td>
+                        <td><a asp-page="/Admin/StaffHours" asp-route-staffId="@m.Id">Working hours</a></td>
+                        <td><a asp-page="/Admin/Staff" asp-route-edit="@m.Id">Edit</a></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="card">
+    <h2>@(Model.FormId is null ? "Add a staff member" : "Edit staff member")</h2>
+    @if (Model.FormError is not null)
+    {
+        <div class="alert alert-error">@Model.FormError</div>
+    }
+    <form method="post" asp-page-handler="Save">
+        <input type="hidden" asp-for="FormId" />
+        <div class="form-row">
+            <div class="field">
+                <label asp-for="FormName">Name</label>
+                <input type="text" asp-for="FormName" required />
+            </div>
+            <div class="field">
+                <label asp-for="FormActive">Active</label>
+                <input type="checkbox" asp-for="FormActive" />
+            </div>
+        </div>
+        <div class="actions">
+            <button type="submit" class="btn">@(Model.FormId is null ? "Add staff member" : "Save changes")</button>
+            @if (Model.FormId is not null)
+            {
+                <a class="btn secondary" asp-page="/Admin/Staff">Cancel editing</a>
+            }
+        </div>
+    </form>
+</div>

@@ -45,6 +45,20 @@ public class WorkingHours
     public TimeOnly EndTime { get; set; }
 }
 
+/// <summary>
+/// A login for a tenant's admin area. One admin per tenant in v1.
+/// PasswordHash is an ASP.NET Core PasswordHasher (PBKDF2) hash — the
+/// plaintext password is never stored.
+/// </summary>
+public class TenantAdmin
+{
+    public Guid Id { get; set; }
+    public Guid TenantId { get; set; }
+    public required string Email { get; set; }
+    public required string PasswordHash { get; set; }
+    public DateTimeOffset CreatedAt { get; set; }
+}
+
 public class Booking
 {
     public Guid Id { get; set; }

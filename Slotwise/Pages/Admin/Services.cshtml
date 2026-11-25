@@ -1,0 +1,66 @@
+@page
+@model Slotwise.Pages.Admin.ServicesModel
+@{
+    ViewData["Title"] = "Services";
+}
+
+<h1>Services</h1>
+<p class="subtitle">What customers can book. Inactive services disappear from the booking page.</p>
+
+<div class="card">
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr><th>Name</th><th>Duration</th><th>Price</th><th>Active</th><th></th></tr>
+            </thead>
+            <tbody>
+                @foreach (var s in Model.Services)
+                {
+                    <tr>
+                        <td>@s.Name</td>
+                        <td>@s.DurationMinutes min</td>
+                        <td>S$@(s.PriceCents / 100m)</td>
+                        <td>@(s.IsActive ? "Yes" : "No")</td>
+                        <td><a asp-page="/Admin/Services" asp-route-edit="@s.Id">Edit</a></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="card">
+    <h2>@(Model.FormId is null ? "Add a service" : "Edit service")</h2>
+    @if (Model.FormError is not null)
+    {
+        <div class="alert alert-error">@Model.FormError</div>
+    }
+    <form method="post" asp-page-handler="Save">
+        <input type="hidden" asp-for="FormId" />
+        <div class="form-row">
+            <div class="field">
+                <label asp-for="FormName">Name</label>
+                <input type="text" asp-for="FormName" required />
+            </div>
+            <div class="field">
+                <label asp-for="FormDuration">Duration (minutes)</label>
+                <input type="number" asp-for="FormDuration" min="5" max="480" step="5" required />
+            </div>
+            <div class="field">
+                <label asp-for="FormPrice">Price (S$)</label>
+                <input type="number" asp-for="FormPrice" min="0" step="0.01" required />
+            </div>
+            <div class="field">
+                <label asp-for="FormActive">Active</label>
+                <input type="checkbox" asp-for="FormActive" />
+            </div>
+        </div>
+        <div class="actions">
+            <button type="submit" class="btn">@(Model.FormId is null ? "Add service" : "Save changes")</button>
+            @if (Model.FormId is not null)
+            {
+                <a class="btn secondary" asp-page="/Admin/Services">Cancel editing</a>
+            }
+        </div>
+    </form>
+</div>

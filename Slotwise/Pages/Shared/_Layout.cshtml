@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@ViewData["Title"] · Slotwise</title>
+    <partial name="_Styles" />
+</head>
+<body>
+    <header class="site-header">
+        <div class="container header-inner">
+            <a class="brand" asp-page="/Index">Slot<span class="accent">wise</span></a>
+            <span class="tagline">Bookings that never collide.</span>
+        </div>
+    </header>
+    <main class="container">
+        @RenderBody()
+    </main>
+    <footer class="site-footer">
+        <div class="container">Slotwise — a multi-tenant booking platform demo.</div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,147 @@
+@page "/book/{slug}"
+@model Slotwise.Pages.Book.IndexModel
+@{
+    ViewData["Title"] = Model.TenantMissing ? "Not found" : $"Book at {Model.Tenant.Name}";
+}
+
+@if (Model.TenantMissing)
+{
+    <div class="card">
+        <h1>We couldn't find that business</h1>
+        <p class="subtitle">
+            There's no booking page at this address. Check the link and try again,
+            or head back to the <a asp-page="/Index">Slotwise home page</a>.
+        </p>
+    </div>
+}
+else if (Model.CompletedBooking is { } done)
+{
+    var doneService = Model.AllServices.FirstOrDefault(s => s.Id == done.ServiceId);
+    var doneStaff = Model.AllStaff.FirstOrDefault(s => s.Id == done.StaffMemberId);
+    <div class="card">
+        <div class="check">✓</div>
+        <h1>You're booked in</h1>
+        <p class="subtitle">Your appointment at @Model.Tenant.Name is confirmed.</p>
+        <dl class="summary">
+            <dt>Service</dt><dd>@doneService?.Name</dd>
+            <dt>With</dt><dd>@doneStaff?.Name</dd>
+            <dt>Date</dt><dd>@Model.Local(done.StartUtc).ToString("dddd, d MMMM yyyy")</dd>
+            <dt>Time</dt><dd>@Model.Local(done.StartUtc).ToString("h:mm tt") – @Model.Local(done.EndUtc).ToString("h:mm tt")</dd>
+            <dt>Name</dt><dd>@done.CustomerName</dd>
+            <dt>Contact</dt><dd>@done.CustomerContact</dd>
+        </dl>
+        <p class="muted">We'll send a reminder to <strong>@done.CustomerContact</strong> before your appointment.</p>
+        <a class="btn secondary" asp-page="/Book/Index" asp-route-slug="@Model.Tenant.Slug">Book another appointment</a>
+    </div>
+}
+else
+{
+    <h1>@Model.Tenant.Name</h1>
+    <p class="subtitle">Book an appointment — no account needed. Times shown in @Model.Tenant.TimeZoneId local time.</p>
+
+    @if (Model.Flash is not null)
+    {
+        <div class="alert alert-warn">@Model.Flash</div>
+    }
+
+    @if (Model.Services.Count == 0 || Model.Staff.Count == 0)
+    {
+        <div class="card">
+            <p class="muted" style="margin:0">This business hasn't opened online booking yet. Please check back soon.</p>
+        </div>
+    }
+    else if (Model.ConfirmSlot is { } slot)
+    {
+        <div class="card">
+            <h2>Confirm your booking</h2>
+            <dl class="summary">
+                <dt>Service</dt><dd>@Model.ConfirmService!.Name (@Model.ConfirmService.DurationMinutes min · S$@(Model.ConfirmService.PriceCents / 100m))</dd>
+                <dt>With</dt><dd>@Model.ConfirmStaff!.Name</dd>
+                <dt>Date</dt><dd>@slot.LocalStart.ToString("dddd, d MMMM yyyy")</dd>
+                <dt>Time</dt><dd>@slot.LocalStart.ToString("h:mm tt")</dd>
+            </dl>
+            @if (Model.FormError is not null)
+            {
+                <div class="alert alert-error">@Model.FormError</div>
+            }
+            <form method="post" asp-page-handler="Book">
+                <input type="hidden" asp-for="FormServiceId" />
+                <input type="hidden" asp-for="FormStaffId" />
+                <input type="hidden" asp-for="FormDate" />
+                <input type="hidden" asp-for="FormSlot" />
+                <div class="field">
+                    <label asp-for="FormName">Your name</label>
+                    <input type="text" asp-for="FormName" autocomplete="name" required />
+                </div>
+                <div class="field">
+                    <label asp-for="FormContact">Phone or email</label>
+                    <input type="text" asp-for="FormContact" autocomplete="email" required />
+                </div>
+                <div class="actions">
+                    <button type="submit" class="btn">Confirm booking</button>
+                    <a class="btn secondary"
+                       asp-page="/Book/Index" asp-route-slug="@Model.Tenant.Slug"
+                       asp-route-serviceId="@Model.ServiceId" asp-route-staffId="@Model.StaffId"
+                       asp-route-date="@Model.Date.ToString("yyyy-MM-dd")">Choose a different time</a>
+                </div>
+            </form>
+        </div>
+    }
+    else
+    {
+        <div class="card">
+            <form method="get">
+                <div class="form-row">
+                    <div class="field">
+                        <label for="serviceId">Service</label>
+                        <select id="serviceId" name="serviceId" onchange="this.form.submit()">
+                            @foreach (var s in Model.Services)
+                            {
+                                <option value="@s.Id" selected="@(Model.ServiceId == s.Id)">
+                                    @s.Name — @s.DurationMinutes min · S$@(s.PriceCents / 100m)
+                                </option>
+                            }
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="staffId">With</label>
+                        <select id="staffId" name="staffId" onchange="this.form.submit()">
+                            @foreach (var m in Model.Staff)
+                            {
+                                <option value="@m.Id" selected="@(Model.StaffId == m.Id)">@m.Name</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="date">Date</label>
+                        <input type="date" id="date" name="date"
+                               value="@Model.Date.ToString("yyyy-MM-dd")"
+                               min="@Model.MinDate.ToString("yyyy-MM-dd")"
+                               max="@Model.MaxDate.ToString("yyyy-MM-dd")"
+                               onchange="this.form.submit()" />
+                    </div>
+                </div>
+                <noscript><button type="submit" class="btn">See available times</button></noscript>
+            </form>
+
+            <h3 style="margin-top:20px">Available times — @Model.Date.ToString("dddd, d MMMM")</h3>
+            @if (Model.Slots.Count == 0)
+            {
+                <p class="muted">No times available on this date. Try another day, or a different staff member.</p>
+            }
+            else
+            {
+                <div class="slots">
+                    @foreach (var s in Model.Slots)
+                    {
+                        <a class="slot"
+                           asp-page="/Book/Index" asp-route-slug="@Model.Tenant.Slug"
+                           asp-route-serviceId="@Model.ServiceId" asp-route-staffId="@Model.StaffId"
+                           asp-route-date="@Model.Date.ToString("yyyy-MM-dd")"
+                           asp-route-slot="@s.StartUtc.ToString("o")">@s.LocalStart.ToString("h:mm tt")</a>
+                    }
+                </div>
+            }
+        </div>
+    }
+}

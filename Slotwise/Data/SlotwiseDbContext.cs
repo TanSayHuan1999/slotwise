@@ -24,6 +24,7 @@ public class SlotwiseDbContext : DbContext
     public DbSet<StaffMember> StaffMembers => Set<StaffMember>();
     public DbSet<WorkingHours> WorkingHours => Set<WorkingHours>();
     public DbSet<Booking> Bookings => Set<Booking>();
+    public DbSet<TenantAdmin> TenantAdmins => Set<TenantAdmin>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -43,6 +44,8 @@ public class SlotwiseDbContext : DbContext
             .HasQueryFilter(w => w.TenantId == CurrentTenantId);
         modelBuilder.Entity<Booking>()
             .HasQueryFilter(b => b.TenantId == CurrentTenantId);
+        modelBuilder.Entity<TenantAdmin>()
+            .HasQueryFilter(a => a.TenantId == CurrentTenantId);
 
         // --- Shape ---------------------------------------------------------
         modelBuilder.Entity<Tenant>(e =>
@@ -67,6 +70,16 @@ public class SlotwiseDbContext : DbContext
         modelBuilder.Entity<WorkingHours>(e =>
         {
             e.HasIndex(w => new { w.StaffMemberId, w.DayOfWeek });
+        });
+
+        modelBuilder.Entity<TenantAdmin>(e =>
+        {
+            e.Property(a => a.Email).HasMaxLength(256);
+            e.Property(a => a.PasswordHash).HasMaxLength(512);
+            // Emails are unique across the platform so a login identifies
+            // exactly one tenant's admin.
+            e.HasIndex(a => a.Email).IsUnique();
+            e.HasIndex(a => a.TenantId);
         });
 
         modelBuilder.Entity<Booking>(e =>

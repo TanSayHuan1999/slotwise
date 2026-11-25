@@ -1,0 +1,51 @@
+@page "/admin/staff/hours/{staffId:guid}"
+@model Slotwise.Pages.Admin.StaffHoursModel
+@{
+    ViewData["Title"] = "Working hours";
+}
+
+<h1>Working hours — @Model.Staff.Name</h1>
+<p class="subtitle">Slots are only offered inside these windows. Untick a day to close it.</p>
+
+@if (Model.Flash is not null)
+{
+    <div class="alert alert-success">@Model.Flash</div>
+}
+@if (Model.FormError is not null)
+{
+    <div class="alert alert-error">@Model.FormError</div>
+}
+
+<div class="card">
+    <form method="post">
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr><th>Day</th><th>Open</th><th>From</th><th>To</th></tr>
+                </thead>
+                <tbody>
+                    @for (var i = 0; i < Model.Rows.Count; i++)
+                    {
+                        var row = Model.Rows[i];
+                        <tr>
+                            <td>
+                                @row.Day
+                                <input type="hidden" name="Rows[@i].Day" value="@row.Day" />
+                            </td>
+                            <td>
+                                <input type="checkbox" name="Rows[@i].Enabled" value="true" checked="@row.Enabled" />
+                                <input type="hidden" name="Rows[@i].Enabled" value="false" />
+                            </td>
+                            <td><input type="time" name="Rows[@i].Start" value="@row.Start" /></td>
+                            <td><input type="time" name="Rows[@i].End" value="@row.End" /></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <div class="actions" style="margin-top:16px">
+            <button type="submit" class="btn">Save working hours</button>
+            <a class="btn secondary" asp-page="/Admin/Staff">Back to staff</a>
+        </div>
+    </form>
+</div>

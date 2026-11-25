@@ -1,0 +1,29 @@
+@page
+@model Slotwise.Pages.Admin.LoginModel
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Admin login";
+}
+
+<div class="card" style="max-width:440px;margin:24px auto">
+    <h1>Business admin</h1>
+    <p class="subtitle">Sign in to manage bookings, services and staff.</p>
+    @if (Model.Error is not null)
+    {
+        <div class="alert alert-error">@Model.Error</div>
+    }
+    <form method="post">
+        <div class="field">
+            <label asp-for="Email">Email</label>
+            <input type="email" asp-for="Email" autocomplete="username" required />
+        </div>
+        <div class="field">
+            <label asp-for="Password">Password</label>
+            <input type="password" asp-for="Password" autocomplete="current-password" required />
+        </div>
+        <button type="submit" class="btn" style="width:100%">Sign in</button>
+    </form>
+    <p class="muted small" style="margin-top:16px">
+        Demo login: <strong>admin@lakeside-dental.test</strong> / <strong>SlotwiseDemo1</strong>
+    </p>
+</div>

@@ -173,70 +173,22 @@ public static class Endpoints
         });
 
         // --- Dev seed --------------------------------------------------------
-        app.MapPost("/api/dev/seed", async (
-            SlotwiseDbContext db, ITenantContext tenantCtx, TimeProvider time) =>
+        // Delegates to the same DemoSeeder the startup seed-on-empty uses,
+        // so both paths produce identical demo data (tenant, services,
+        // staff, hours, admin login, sample bookings).
+        app.MapPost("/api/dev/seed", async (DemoSeeder seeder) =>
         {
-            const string slug = "lakeside-dental";
-            var existing = await db.Tenants.IgnoreQueryFilters()
-                .FirstOrDefaultAsync(t => t.Slug == slug);
-            if (existing is not null)
+            var result = await seeder.SeedAsync();
+            var payload = new
             {
-                tenantCtx.TenantId = existing.Id;
-                return Results.Ok(new
-                {
-                    created = false,
-                    tenant = TenantDto.From(existing),
-                    services = await db.Services.Select(s => ServiceDto.From(s)).ToListAsync(),
-                    staff = await db.StaffMembers.Select(s => StaffDto.From(s)).ToListAsync(),
-                });
-            }
-
-            var tenant = new Tenant
-            {
-                Id = Guid.NewGuid(),
-                Name = "Lakeside Dental",
-                Slug = slug,
-                TimeZoneId = "Asia/Singapore",
-                CreatedAt = time.GetUtcNow(),
+                created = result.TenantCreated,
+                tenant = TenantDto.From(result.Tenant),
+                services = result.Services.Select(ServiceDto.From).ToArray(),
+                staff = result.Staff.Select(StaffDto.From).ToArray(),
             };
-            db.Tenants.Add(tenant);
-            await db.SaveChangesAsync();
-            tenantCtx.TenantId = tenant.Id;
-
-            var checkup = new Service { Id = Guid.NewGuid(), TenantId = tenant.Id, Name = "Checkup", DurationMinutes = 30, PriceCents = 5000 };
-            var cleaning = new Service { Id = Guid.NewGuid(), TenantId = tenant.Id, Name = "Cleaning", DurationMinutes = 60, PriceCents = 8000 };
-            db.Services.AddRange(checkup, cleaning);
-
-            var chen = new StaffMember { Id = Guid.NewGuid(), TenantId = tenant.Id, Name = "Dr. Chen" };
-            var patel = new StaffMember { Id = Guid.NewGuid(), TenantId = tenant.Id, Name = "Dr. Patel" };
-            db.StaffMembers.AddRange(chen, patel);
-
-            foreach (var staff in new[] { chen, patel })
-            foreach (var day in new[]
-            {
-                DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday,
-                DayOfWeek.Thursday, DayOfWeek.Friday, DayOfWeek.Saturday,
-            })
-            {
-                db.WorkingHours.Add(new WorkingHours
-                {
-                    Id = Guid.NewGuid(),
-                    TenantId = tenant.Id,
-                    StaffMemberId = staff.Id,
-                    DayOfWeek = day,
-                    StartTime = new TimeOnly(9, 0),
-                    EndTime = new TimeOnly(18, 0),
-                });
-            }
-            await db.SaveChangesAsync();
-
-            return Results.Created("/api/tenants/lakeside-dental", new
-            {
-                created = true,
-                tenant = TenantDto.From(tenant),
-                services = new[] { ServiceDto.From(checkup), ServiceDto.From(cleaning) },
-                staff = new[] { StaffDto.From(chen), StaffDto.From(patel) },
-            });
+            return result.TenantCreated
+                ? Results.Created("/api/tenants/lakeside-dental", payload)
+                : Results.Ok(payload);
         });
     }
 

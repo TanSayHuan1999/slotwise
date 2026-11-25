@@ -1,0 +1,32 @@
+@page
+@model Slotwise.Pages.IndexModel
+@{
+    ViewData["Title"] = "Bookings that never collide";
+}
+
+<div class="card">
+    <h1>Bookings that never collide.</h1>
+    <p class="subtitle">
+        Slotwise is a multi-tenant appointment booking platform. Every business gets a public
+        booking page and an admin dashboard — and the database itself guarantees a staff member
+        can never be double-booked, even when two customers race for the same slot.
+    </p>
+    <div class="actions">
+        @if (Model.DemoTenant is not null)
+        {
+            <a class="btn" asp-page="/Book/Index" asp-route-slug="@Model.DemoTenant.Slug">
+                Book at @Model.DemoTenant.Name
+            </a>
+        }
+        <a class="btn secondary" asp-page="/Admin/Login">Business admin login</a>
+    </div>
+</div>
+
+<div class="card">
+    <h2>How it works</h2>
+    <p class="muted" style="margin:0">
+        Customers pick a service, a staff member and a time — no account needed. Owners sign in to
+        see today's bookings, manage services, staff and working hours, and watch reminders get
+        marked by the background service as appointments approach.
+    </p>
+</div>

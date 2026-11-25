@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@ViewData["Title"] · Slotwise Admin</title>
+    <partial name="_Styles" />
+</head>
+<body>
+    <header class="site-header">
+        <div class="container header-inner">
+            <a class="brand" asp-page="/Admin/Index">Slot<span class="accent">wise</span> <span class="brand-sub">admin</span></a>
+            <nav class="admin-nav">
+                <a asp-page="/Admin/Index">Dashboard</a>
+                <a asp-page="/Admin/Bookings">Bookings</a>
+                <a asp-page="/Admin/Services">Services</a>
+                <a asp-page="/Admin/Staff">Staff</a>
+                @if (User.FindFirst(SlotwiseClaims.TenantSlug) is { } slugClaim)
+                {
+                    <a asp-page="/Book/Index" asp-route-slug="@slugClaim.Value">View booking page</a>
+                }
+                <form method="post" asp-page="/Admin/Logout" class="logout-form">
+                    <button type="submit" class="btn small secondary">Log out</button>
+                </form>
+            </nav>
+        </div>
+        <div class="container tenant-line">
+            Signed in as <strong>@User.Identity?.Name</strong>
+            @if (User.FindFirst(SlotwiseClaims.TenantName) is { } nameClaim)
+            {
+                <span>· @nameClaim.Value</span>
+            }
+        </div>
+    </header>
+    <main class="container">
+        @RenderBody()
+    </main>
+    <footer class="site-footer">
+        <div class="container">Slotwise admin — demo environment.</div>
+    </footer>
+</body>
+</html>
