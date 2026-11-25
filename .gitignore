@@ -480,3 +480,13 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
+
+# Workspace-only deploy/demo helpers (kept out of the public repo —
+# the same split as the sister projects: runbooks, cloud-init, demo
+# scripts and recordings live in the workspace folder only)
+docker-compose.server.yml
+cloud-init-*.yaml
+DEPLOY.md
+demo-session.sh
+render-*.py
+*.mp4

@@ -14,19 +14,27 @@ namespace Slotwise.Tests;
 /// </summary>
 public class TestDbFixture : IAsyncLifetime
 {
-    // NOTE: connections go through the PostgreSQL Unix socket, not TCP.
-    // This sandbox transparently redirects outbound TCP connects from .NET
-    // processes to an egress proxy, which breaks Npgsql-over-TCP (and the
-    // old vstest channel). Unix sockets are unaffected.
+    // The admin connection points at a maintenance database (postgres) with
+    // a user allowed to create/drop databases. CI — and any normal machine —
+    // supplies it via SLOTWISE_TEST_ADMIN_CONNECTION, a full Npgsql
+    // connection string over TCP. Locally it falls back to this sandbox's
+    // PostgreSQL Unix socket: the sandbox transparently redirects outbound
+    // TCP connects from .NET processes to an egress proxy, which breaks
+    // Npgsql-over-TCP (and the old vstest channel); Unix sockets are
+    // unaffected.
     private const string SocketHost = "/home/hatch/pg16/run";
 
-    private const string AdminConnectionString =
-        $"Host={SocketHost};Port=5434;Database=postgres;Username=settle";
+    private static readonly string AdminBase =
+        Environment.GetEnvironmentVariable("SLOTWISE_TEST_ADMIN_CONNECTION")
+        ?? $"Host={SocketHost};Port=5434;Database=postgres;Username=settle";
+
+    private static string AdminConnectionString => AdminBase;
 
     public string DatabaseName { get; } = $"slotwise_test_{Guid.NewGuid():N}";
 
     public string ConnectionString =>
-        $"Host={SocketHost};Port=5434;Database={DatabaseName};Username=settle";
+        new NpgsqlConnectionStringBuilder(AdminBase) { Database = DatabaseName }
+            .ConnectionString;
 
     public async ValueTask InitializeAsync()
     {

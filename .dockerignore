@@ -1,0 +1,7 @@
+**/bin
+**/obj
+.git
+TestResults
+*.md
+*.mp4
+docker-compose*.yml
