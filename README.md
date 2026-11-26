@@ -12,9 +12,9 @@ refuses to hold two overlapping bookings for the same staff member**, so
 no bug, retry or race in the app can double-book anyone.
 
 **Live demo:** the app is running on a VPS at
-http://5.222.0.70/slotwise/book/lakeside-dental — book a slot at the demo
+https://slotwise.eveningstack.com/book/lakeside-dental — book a slot at the demo
 clinic, then try to take the same one again. The business side is at
-http://5.222.0.70/slotwise/admin (demo-only login:
+https://slotwise.eveningstack.com/admin (demo-only login:
 `admin@lakeside-dental.test` / `SlotwiseDemo1`).
 
 ## Demo
@@ -137,8 +137,8 @@ JSON API (the booking page and the API share one engine):
 | `POST /api/tenants`, `…/services`, `…/staff`, `PUT …/staff/{id}/hours` | Tenant setup |
 
 ```bash
-curl -s "http://5.222.0.70/slotwise/api/book/lakeside-dental/slots?serviceId=…&staffId=…&date=2026-12-02"
-curl -s -X POST http://5.222.0.70/slotwise/api/book/lakeside-dental \
+curl -s "https://slotwise.eveningstack.com/api/book/lakeside-dental/slots?serviceId=…&staffId=…&date=2026-12-02"
+curl -s -X POST https://slotwise.eveningstack.com/api/book/lakeside-dental \
   -H "Content-Type: application/json" \
   -d '{"serviceId":"…","staffId":"…","customerName":"Demo User",
        "customerContact":"demo@example.com","startUtc":"2026-12-02T01:00:00Z"}'
