@@ -17,6 +17,18 @@ clinic, then try to take the same one again. The business side is at
 http://5.222.0.70/slotwise/admin (demo-only login:
 `admin@lakeside-dental.test` / `SlotwiseDemo1`).
 
+## Demo
+
+Two views of the same system — the product first, then the proof underneath.
+
+**The UI walkthrough** — booking a cleaning appointment on the live site: pick a slot, confirm, and then watch that slot disappear from the day for everyone else — ending with the same booking sitting in the business's admin list.
+
+https://github.com/user-attachments/assets/60873d6b-0893-40e9-a09b-f90739908dd3
+
+**The API in a terminal** — the same guarantees over HTTP against the live server: fetch the day's slots, book one, send the identical booking again and get refused, cancel, and see the slot come back.
+
+https://github.com/user-attachments/assets/5dd1c336-ff8b-49d3-bdad-3767ba1eb9f3
+
 ## How it works
 
 ```
