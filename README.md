@@ -21,9 +21,9 @@ http://5.222.0.70/slotwise/admin (demo-only login:
 
 Two views of the same system — the product first, then the proof underneath.
 
-**The UI walkthrough** — booking a cleaning appointment on the live site: pick a slot, confirm, and then watch that slot disappear from the day for everyone else — ending with the same booking sitting in the business's admin list.
+**Two customers, one slot** — the race, live: two windows book the same Saturday 9:00 AM cleaning at the same moment. One is confirmed; the other is turned away by the database itself. Then the winning booking lands in the business's admin list.
 
-https://github.com/user-attachments/assets/60873d6b-0893-40e9-a09b-f90739908dd3
+https://github.com/user-attachments/assets/c30d4e40-2551-471e-99ad-217e338504a9
 
 **The API in a terminal** — the same guarantees over HTTP against the live server: fetch the day's slots, book one, send the identical booking again and get refused, cancel, and see the slot come back.
 
